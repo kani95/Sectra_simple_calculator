@@ -5,20 +5,17 @@
 #include <queue>
 
 #include "Environment.h"
-#include "Operations.h"
 
 class CalcParser
 {
     public:
-        ~CalcParser();
         void parse(std::ifstream & inputFile);
-        void getValue(BaseOperation* & registerName);
         void execute();
 
     private:
-        BaseOperation* classifyOperation(std::vector<std::string> const& operation);
+        std::string getOperationType(std::vector<std::string> const& operation);
+        void createOperationNode(std::string const& registerName, std::string const& operationType, std::string const& value);
 
-        std::vector<BaseOperation*> allOperations;
         Environment env;
 };
 

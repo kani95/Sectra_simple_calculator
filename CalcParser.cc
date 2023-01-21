@@ -6,11 +6,10 @@
 #include "CalcParser.h"
 #include "Operations.h"
 
-CalcParser::~CalcParser()
-{}
-
 void CalcParser::parse(std::ifstream & inputFile)
 {
+    using namespace std::string_literals;
+
     std::string line{};
     std::stringstream ss{};
     std::vector<std::string> extractedLine{};
@@ -23,20 +22,31 @@ void CalcParser::parse(std::ifstream & inputFile)
         while (ss >> word)
         {
             std::transform(word.begin(), word.end(), word.begin(), ::tolower);
-            // TODO create the class here and add it to the vector
             extractedLine.push_back(word);
         }
 
-        BaseOperation* operation {classifyOperation(extractedLine)};
-        
-        if (dynamic_cast<PrintOperation*>(operation))
+        std::string operationsType {getOperationType(extractedLine)};
+
+        if (operationsType.size() == 0)
         {
-            env.execute(operation -> getRegisterName());
-            operation -> execute(env.getRegisters(), env.getValues());
+            continue;
         }
-        else if (dynamic_cast<QuitOperation*>(operation))
+
+        if (operationsType == "print"s)
         {
-            exit(true);
+            std::string registerName = extractedLine[1];
+            env.execute(registerName);
+            std::cout << env.getRegisterValue(registerName) << std::endl;
+        }
+        else if (operationsType == "quit"s)
+        {
+            exit(1);
+        }
+        else
+        {
+            std::string registerName = extractedLine[0];
+            std::string value = extractedLine[2];
+            createOperationNode(registerName, operationsType, value); 
         }
         
         extractedLine.clear();
@@ -44,19 +54,14 @@ void CalcParser::parse(std::ifstream & inputFile)
     }
 }
 
-BaseOperation* CalcParser::classifyOperation(std::vector<std::string> const& operation)
+std::string CalcParser::getOperationType(std::vector<std::string> const& operation)
 {
-
-    using namespace std::string_literals;
-
     size_t nrOfArgs = operation.size();
     std::string operationType;
-    std::string operationValue;
-    std::string registerName;
 
     if (nrOfArgs == 0)
     {
-        return nullptr;
+        return "";
     }
     else if (nrOfArgs < 3)
     {
@@ -71,58 +76,36 @@ BaseOperation* CalcParser::classifyOperation(std::vector<std::string> const& ope
         std::cerr << "Error, cannot classify operation: ";
         std::copy(operation.begin(), operation.end(), std::ostream_iterator<std::string>(std::cerr, " "));
         std::cerr << std::endl;
-        return nullptr;
+        return "";
     }
+    
+    return operationType;
+}
+
+void CalcParser::createOperationNode(std::string const& registerName, std::string const& operationType, std::string const& value)
+{
+    using namespace std::string_literals;
 
     BaseOperation* currentOperation;
 
-    if (operationType == "print"s)
-    {
-        std::string registerName = operation[1];
-        return new PrintOperation{registerName};
-    }
     if (operationType == "add"s)
     {
-        std::string registerName = operation[0];
-        std::string value = operation[2];
-        currentOperation  = new AddOperation{registerName, value};
-        env.storeOperation(registerName, currentOperation);
-
-        return currentOperation; 
-        
-        //allOperations.push_back(addOperation);
+        currentOperation = new AddOperation{registerName, value};
     }
-    else if (operationType == "subtract")
+    else if (operationType == "subtract"s)
     {
-        std::string registerName = operation[0];
-        std::string value = operation[2];
         currentOperation = new SubtractOperation{registerName, value};
-        env.storeOperation(registerName, currentOperation);
-        return currentOperation;
-        //env.initRegister(registerName);
-        //allOperations.push_back(subtractOperation);
     }
-    else if (operationType == "multiply")
+    else if (operationType == "multiply"s)
     {
-        std::string registerName = operation[0];
-        std::string value = operation[2];
         currentOperation = new MultiplyOperation{registerName, value};
-        env.storeOperation(registerName, currentOperation);
-        return currentOperation;
-        //env.initRegister(registerName);
-        //allOperations.push_back(multiplyOperation);
-    }
-    else if (operationType == "quit")
-    {
-        return new QuitOperation{};
     }
     else
     {
-        std::cerr << "Error, cannot classify operation: ";
-        std::copy(operation.begin(), operation.end(), std::ostream_iterator<std::string>(std::cerr, " "));
-        std::cerr << std::endl;
-        return nullptr;
+        std::cerr << "Error, cannot classify operation: " << registerName << " " << operationType << " " << value << std::endl;
     }
+
+    env.storeOperation(registerName, currentOperation); 
 }
 
 void CalcParser::execute()

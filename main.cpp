@@ -20,7 +20,6 @@ int main(int argc, char *argv[])
     }
 
     CalcParser calcParser{};
-    // TODO create new class AST that accepts the list as input and creates the tree
     calcParser.parse(inputFile);
 
     return 0;

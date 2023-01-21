@@ -20,73 +20,25 @@ AddOperation::AddOperation(std::string const& registerName, std::string const& v
     : BaseOperation{registerName, value}
 {}
 
-void AddOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
+long AddOperation::execute(long oldValue, long newValue)
 {
-    if (env.find(value) != env.end())
-    {
-        for (BaseOperation* operation : env.at(value))
-        {
-            operation -> execute(env, values);
-        }
-    }
-    else
-    {
-        values[registerName] += std::stol(value);
-    }
+    return oldValue + newValue;
 }
 
 SubtractOperation::SubtractOperation(std::string const& registerName, std::string const& value)
     : BaseOperation{registerName, value}
 {}
 
-void SubtractOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
+long SubtractOperation::execute(long oldValue, long newValue)
 {
-    if (env.find(value) != env.end())
-    {
-        for (BaseOperation* operation : env.at(value))
-        {
-            operation -> execute(env, values);
-        }
-    }
-    else
-    {
-        values[registerName] -= std::stol(value);
-    }
+    return oldValue - newValue;
 }
 
 MultiplyOperation::MultiplyOperation(std::string const& registerName, std::string const& value)
     : BaseOperation{registerName, value}
 {}
 
-void MultiplyOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
+long MultiplyOperation::execute(long oldValue, long newValue)
 {
-    if (env.find(value) != env.end())
-    {
-        for (BaseOperation* operation : env.at(value))
-        {
-            operation -> execute(env, values);
-        }
-    }
-    else
-    {
-        values[registerName] *= std::stol(value);
-    }
-}
-
-PrintOperation::PrintOperation(std::string const& registerName)
-    : BaseOperation(registerName, "")
-{}
-
-void PrintOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
-{
-    std::cout << values[registerName] << std::endl;
-}
-
-QuitOperation::QuitOperation()
-    : BaseOperation("", "")
-{}
-
-void QuitOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
-{
-    exit(0);
+    return oldValue * newValue;
 }
