@@ -1,12 +1,19 @@
+#include <iostream>
+
 #include "Operations.h"
 
-BaseOperation::BaseOperation(std::string const& registerName, bool executedAtPrint)
-    : registerName(registerName), executedAtPrint(executedAtPrint)
+BaseOperation::BaseOperation(std::string const& registerName, bool execAtPrint)
+    : registerName(registerName), execAtPrint(execAtPrint)
 {}
 
-bool BaseOperation::getExecutedAtPrint() const
+bool BaseOperation::getExecAtPrint() const
 {
-    return executedAtPrint;
+    return execAtPrint;
+}
+
+void BaseOperation::setExecAtPrint(bool execAtPrint)
+{
+    this->execAtPrint = execAtPrint;
 }
 
 AddOperation::AddOperation(std::string const& registerName, std::string const& value)
@@ -15,12 +22,17 @@ AddOperation::AddOperation(std::string const& registerName, std::string const& v
 
 void AddOperation::execute(Environment & env)
 {
-    if (env.shouldExecAtPrint(value))
+    if (env.isRegister(value) && !execAtPrint)
     {
-        executedAtPrint = true;
+        execAtPrint = true;
     }
     else
     {
+        if (env.isRegister(value))
+        {
+            value = std::to_string(env.getRegisterValue(value));
+        }
+
         env.add(registerName, value);
     }
 }
@@ -31,12 +43,17 @@ SubtractOperation::SubtractOperation(std::string const& registerName, std::strin
 
 void SubtractOperation::execute(Environment & env)
 {
-    if (env.shouldExecAtPrint(value))
+    if (env.isRegister(value))
     {
-        executedAtPrint = true;
+        execAtPrint = true;
     }
     else
     {
+        if (env.isRegister(value))
+        {
+            value = std::to_string(env.getRegisterValue(value));
+        }
+
         env.subtraction(registerName, value);
     }
 }
@@ -47,12 +64,17 @@ MultiplyOperation::MultiplyOperation(std::string const& registerName, std::strin
 
 void MultiplyOperation::execute(Environment & env)
 {
-    if (env.shouldExecAtPrint(value))
+    if (env.isRegister(value))
     {
-        executedAtPrint = true;
+        execAtPrint = true;
     }
     else
     {
+        if (env.isRegister(value))
+        {
+            value = std::to_string(env.getRegisterValue(value));
+        }
+
         env.multiply(registerName, value);
     }
 }

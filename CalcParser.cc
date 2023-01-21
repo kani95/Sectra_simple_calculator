@@ -8,14 +8,16 @@
 
 CalcParser::~CalcParser()
 {
-    for (BaseOperation* & operation : operationsExecAtOccurrence)
+    while (!allOperations.empty())
     {
-        delete operation;
+        delete allOperations.front();
+        allOperations.pop();
     }
 
-    for (BaseOperation* & operation : operationsExecAtPrint)
+    while (!operationsExecAtPrint.empty())
     {
-        delete operation;
+        delete operationsExecAtPrint.front();
+        operationsExecAtPrint.pop();
     }
 }
 
@@ -32,6 +34,8 @@ void CalcParser::parse(std::ifstream & inputFile)
        
         while (ss >> word)
         {
+            std::transform(word.begin(), word.end(), word.begin(), ::tolower);
+            // TODO create the class here and add it to the vector
             extractedLine.push_back(word);
         }
 
@@ -69,67 +73,38 @@ void CalcParser::classifyOperation(std::vector<std::string> const& operation)
         return;
     }
 
-    std::transform(operationType.begin(), operationType.end(), operationType.begin(), ::tolower);
-
     if (operationType == "print"s)
     {
         std::string registerName = operation[1];
-        std::transform(registerName.begin(), registerName.end(), registerName.begin(), ::tolower);
-        operationsExecAtOccurrence.push_back(new PrintOperation{registerName});
+        allOperations.push(new PrintOperation{registerName});
     }
     else if (operationType == "add"s)
     {
         std::string registerName = operation[0];
-        std::transform(registerName.begin(), registerName.end(), registerName.begin(), ::tolower);
         std::string value = operation[2];
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
         BaseOperation* addOperation = new AddOperation{registerName, value};
-        std::cout << "addOperation: " << addOperation -> getExecutedAtPrint() << std::endl;
-        if (addOperation -> getExecutedAtPrint())
-        {
-            operationsExecAtPrint.push_back(addOperation);
-        }
-        else
-        {
-            operationsExecAtOccurrence.push_back(addOperation);
-        }
+        env.initRegister(registerName);
+        allOperations.push(addOperation);
     }
     else if (operationType == "subtract")
     {
         std::string registerName = operation[0];
-        std::transform(registerName.begin(), registerName.end(), registerName.begin(), ::tolower);
         std::string value = operation[2];
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
         BaseOperation* subtractOperation = new SubtractOperation{registerName, value};
-
-        if (subtractOperation -> getExecutedAtPrint())
-        {
-            operationsExecAtPrint.push_back(subtractOperation);
-        }
-        else
-        {
-            operationsExecAtOccurrence.push_back(subtractOperation);
-        }
+        env.initRegister(registerName);
+        allOperations.push(subtractOperation);
     }
     else if (operationType == "multiply")
     {
         std::string registerName = operation[0];
         std::string value = operation[2];
-        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
         BaseOperation* multiplyOperation = new MultiplyOperation{registerName, value};
-        
-        if (multiplyOperation -> getExecutedAtPrint())
-        {
-            operationsExecAtPrint.push_back(multiplyOperation);
-        }
-        else
-        {
-            operationsExecAtOccurrence.push_back(multiplyOperation);
-        }
+        env.initRegister(registerName);
+        allOperations.push(multiplyOperation);
     }
     else if (operationType == "quit")
     {
-        operationsExecAtOccurrence.push_back(new QuitOperation{});
+        allOperations.push(new QuitOperation{});
     }
     else
     {
@@ -141,22 +116,35 @@ void CalcParser::classifyOperation(std::vector<std::string> const& operation)
 }
 
 void CalcParser::execute()
-{
-    for (BaseOperation* & operation : operationsExecAtOccurrence)
+{   
+    while (!allOperations.empty())
     {
+        BaseOperation* operation = allOperations.front();
+
         if (dynamic_cast<PrintOperation*>(operation))
         {
-            std::cout << "size: " << operationsExecAtPrint.size() << std::endl;
-            for (BaseOperation* & operation : operationsExecAtPrint)
+            while (!operationsExecAtPrint.empty())
             {
-                operation -> execute(env);
+                BaseOperation* innerOperation = operationsExecAtPrint.front();
+                innerOperation -> setExecAtPrint(false);
+                innerOperation -> execute(env);
 
-                delete operation;
+                delete innerOperation;
+                operationsExecAtPrint.pop();
             }
         }
 
         operation -> execute(env);
+           
+        if (operation -> getExecAtPrint())
+        {
+            operationsExecAtPrint.push(operation);
+        }
+        else
+        {
+            delete operation;
+        }
 
-        delete operation;
+        allOperations.pop();
     }
 }

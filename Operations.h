@@ -8,20 +8,22 @@
 class BaseOperation
 {
     public:
-        BaseOperation(std::string const& registerName, bool executedAtPrint = false);
+        BaseOperation(std::string const& registerName, bool execAtPrint = false);
         virtual ~BaseOperation() = default;
+        bool getExecAtPrint() const;
+        void setExecAtPrint(bool execAtPrint);
         virtual void execute(Environment & env) = 0;
-        bool getExecutedAtPrint() const;
 
     protected:
         std::string registerName;
-        bool executedAtPrint;
+        bool execAtPrint;
 };
 
 class AddOperation : public BaseOperation
 {
     public:
-        using BaseOperation::getExecutedAtPrint;
+        using BaseOperation::getExecAtPrint;
+        using BaseOperation::setExecAtPrint;
 
         AddOperation(std::string const& registerName, std::string const& value);
         void execute(Environment & env) override;
@@ -39,7 +41,8 @@ class PrintOperation : public BaseOperation
 class SubtractOperation : public BaseOperation
 {
     public:
-        using BaseOperation::getExecutedAtPrint;
+        using BaseOperation::getExecAtPrint;
+        using BaseOperation::setExecAtPrint;
 
         SubtractOperation(std::string const& registerName, std::string const& value);
         void execute(Environment & env) override;
@@ -50,7 +53,8 @@ class SubtractOperation : public BaseOperation
 class MultiplyOperation : public BaseOperation
 {
     public:
-        using BaseOperation::getExecutedAtPrint;
+        using BaseOperation::getExecAtPrint;
+        using BaseOperation::setExecAtPrint;
 
         MultiplyOperation(std::string const& registerName, std::string const& value);
         void execute(Environment & env) override;

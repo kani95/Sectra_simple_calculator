@@ -1,5 +1,10 @@
-a add 10 
-b add a 
-b add 1 
-print b
+result add revenue 
+result subtract costs 
+revenue add 200 
+costs add salaries 
+salaries add 20 
+salaries multiply 5 
+costs add 10 
+print result 
 QUIT
+

@@ -2,7 +2,7 @@
 #define CALC_PARSER_H
 
 #include <fstream>
-#include <vector>
+#include <queue>
 
 #include "Environment.h"
 #include "Operations.h"
@@ -17,8 +17,8 @@ class CalcParser
     private:
         void classifyOperation(std::vector<std::string> const& operation);
 
-        std::vector<BaseOperation*> operationsExecAtOccurrence;
-        std::vector<BaseOperation*> operationsExecAtPrint;
+        std::queue<BaseOperation*> allOperations;
+        std::queue<BaseOperation*> operationsExecAtPrint;
         Environment env;
 };
 
