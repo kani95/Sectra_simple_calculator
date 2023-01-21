@@ -2,97 +2,91 @@
 
 #include "Operations.h"
 
-BaseOperation::BaseOperation(std::string const& registerName, bool execAtPrint)
-    : registerName(registerName), execAtPrint(execAtPrint)
+BaseOperation::BaseOperation(std::string const& registerName, std::string const& value)
+    : registerName{registerName}, value{value}
 {}
 
-bool BaseOperation::getExecAtPrint() const
+std::string BaseOperation::getRegisterName() const
 {
-    return execAtPrint;
+    return registerName;
 }
 
-void BaseOperation::setExecAtPrint(bool execAtPrint)
+std::string BaseOperation::getValue() const
 {
-    this->execAtPrint = execAtPrint;
+    return value;
 }
 
 AddOperation::AddOperation(std::string const& registerName, std::string const& value)
-    : BaseOperation(registerName), value(value)
+    : BaseOperation{registerName, value}
 {}
 
-void AddOperation::execute(Environment & env)
+void AddOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
 {
-    if (env.isRegister(value) && !execAtPrint)
+    if (env.find(value) != env.end())
     {
-        execAtPrint = true;
+        for (BaseOperation* operation : env.at(value))
+        {
+            operation -> execute(env, values);
+        }
     }
     else
     {
-        if (env.isRegister(value))
-        {
-            value = std::to_string(env.getRegisterValue(value));
-        }
-
-        env.add(registerName, value);
+        values[registerName] += std::stol(value);
     }
 }
 
 SubtractOperation::SubtractOperation(std::string const& registerName, std::string const& value)
-    : BaseOperation(registerName), value(value)
+    : BaseOperation{registerName, value}
 {}
 
-void SubtractOperation::execute(Environment & env)
+void SubtractOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
 {
-    if (env.isRegister(value))
+    if (env.find(value) != env.end())
     {
-        execAtPrint = true;
+        for (BaseOperation* operation : env.at(value))
+        {
+            operation -> execute(env, values);
+        }
     }
     else
     {
-        if (env.isRegister(value))
-        {
-            value = std::to_string(env.getRegisterValue(value));
-        }
-
-        env.subtraction(registerName, value);
+        values[registerName] -= std::stol(value);
     }
 }
 
 MultiplyOperation::MultiplyOperation(std::string const& registerName, std::string const& value)
-    : BaseOperation(registerName), value(value)
+    : BaseOperation{registerName, value}
 {}
 
-void MultiplyOperation::execute(Environment & env)
+void MultiplyOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
 {
-    if (env.isRegister(value))
+    if (env.find(value) != env.end())
     {
-        execAtPrint = true;
+        for (BaseOperation* operation : env.at(value))
+        {
+            operation -> execute(env, values);
+        }
     }
     else
     {
-        if (env.isRegister(value))
-        {
-            value = std::to_string(env.getRegisterValue(value));
-        }
-
-        env.multiply(registerName, value);
+        values[registerName] *= std::stol(value);
     }
 }
 
 PrintOperation::PrintOperation(std::string const& registerName)
-    : BaseOperation(registerName)
+    : BaseOperation(registerName, "")
 {}
 
-void PrintOperation::execute(Environment & env)
+void PrintOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
 {
-    env.print(registerName);
+    std::cout << values[registerName] << std::endl;
 }
 
 QuitOperation::QuitOperation()
-    : BaseOperation("")
+    : BaseOperation("", "")
 {}
 
-void QuitOperation::execute(Environment & env)
+void QuitOperation::execute(std::unordered_map<std::string, std::vector<BaseOperation*>> env, std::unordered_map<std::string, long> values)
 {
-    env.quit();
+    exit(0);
 }

@@ -12,13 +12,13 @@ class CalcParser
     public:
         ~CalcParser();
         void parse(std::ifstream & inputFile);
+        void getValue(BaseOperation* & registerName);
         void execute();
 
     private:
-        void classifyOperation(std::vector<std::string> const& operation);
+        BaseOperation* classifyOperation(std::vector<std::string> const& operation);
 
-        std::queue<BaseOperation*> allOperations;
-        std::queue<BaseOperation*> operationsExecAtPrint;
+        std::vector<BaseOperation*> allOperations;
         Environment env;
 };
 

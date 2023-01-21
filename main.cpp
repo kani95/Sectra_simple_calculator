@@ -3,13 +3,6 @@
 
 #include "CalcParser.h"
 
-/*
-    step 1: set all registers to 0. (loop through operation_list) until print operation
-    step 2: Loop through operation_list and check if the operation has a register as value or contains letters.
-        step 2.1: if yes, then save to separate operations_list that is executed before print operation
-        step 2.2: if no, then store in original operations_list
-*/
-
 int main(int argc, char *argv[]) 
 {
     if (argc != 2) 
@@ -29,7 +22,6 @@ int main(int argc, char *argv[])
     CalcParser calcParser{};
     // TODO create new class AST that accepts the list as input and creates the tree
     calcParser.parse(inputFile);
-    calcParser.execute();
 
     return 0;
 }

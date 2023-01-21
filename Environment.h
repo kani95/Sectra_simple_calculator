@@ -3,13 +3,19 @@
 
 #include <unordered_map>
 #include <string>
+#include <vector>
+
+#include "Operations.h"
 
 class Environment
 {
     public:
-        void initRegister(std::string const& name);
         bool isRegister(std::string const& name);
-        long getRegisterValue(std::string const& name) const;
+        void storeOperation(std::string const& registerName, BaseOperation* newOperation);
+        std::vector<BaseOperation*> getRegisterValue(std::string const& name) const;
+        std::unordered_map<std::string, long> getValues() const;
+        std::unordered_map<std::string, std::vector<BaseOperation*>> getRegisters() const;
+        long execute(std::string const& registerName);
         void add(std::string const& name, std::string value);
         void subtraction(std::string const& name, std::string value);
         void multiply(std::string const& name, std::string value);
@@ -17,7 +23,8 @@ class Environment
         void quit();
 
     private:        
-        std::unordered_map<std::string, long> registers;
+        std::unordered_map<std::string, std::vector<BaseOperation*>> registers;
+        std::unordered_map<std::string, long> values;
 };
 
 #endif

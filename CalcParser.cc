@@ -7,19 +7,7 @@
 #include "Operations.h"
 
 CalcParser::~CalcParser()
-{
-    while (!allOperations.empty())
-    {
-        delete allOperations.front();
-        allOperations.pop();
-    }
-
-    while (!operationsExecAtPrint.empty())
-    {
-        delete operationsExecAtPrint.front();
-        operationsExecAtPrint.pop();
-    }
-}
+{}
 
 void CalcParser::parse(std::ifstream & inputFile)
 {
@@ -39,27 +27,40 @@ void CalcParser::parse(std::ifstream & inputFile)
             extractedLine.push_back(word);
         }
 
-        classifyOperation(extractedLine);
-
+        BaseOperation* operation {classifyOperation(extractedLine)};
+        
+        if (dynamic_cast<PrintOperation*>(operation))
+        {
+            env.execute(operation -> getRegisterName());
+            operation -> execute(env.getRegisters(), env.getValues());
+        }
+        else if (dynamic_cast<QuitOperation*>(operation))
+        {
+            exit(true);
+        }
+        
         extractedLine.clear();
         ss.clear();
     }
 }
 
-void CalcParser::classifyOperation(std::vector<std::string> const& operation)
+BaseOperation* CalcParser::classifyOperation(std::vector<std::string> const& operation)
 {
+
     using namespace std::string_literals;
 
     size_t nrOfArgs = operation.size();
     std::string operationType;
+    std::string operationValue;
+    std::string registerName;
 
     if (nrOfArgs == 0)
     {
-        return;
+        return nullptr;
     }
     else if (nrOfArgs < 3)
     {
-        operationType = operation[0];        
+        operationType = operation[0];
     }
     else if (nrOfArgs == 3)
     {
@@ -70,81 +71,61 @@ void CalcParser::classifyOperation(std::vector<std::string> const& operation)
         std::cerr << "Error, cannot classify operation: ";
         std::copy(operation.begin(), operation.end(), std::ostream_iterator<std::string>(std::cerr, " "));
         std::cerr << std::endl;
-        return;
+        return nullptr;
     }
+
+    BaseOperation* currentOperation;
 
     if (operationType == "print"s)
     {
         std::string registerName = operation[1];
-        allOperations.push(new PrintOperation{registerName});
+        return new PrintOperation{registerName};
     }
-    else if (operationType == "add"s)
+    if (operationType == "add"s)
     {
         std::string registerName = operation[0];
         std::string value = operation[2];
-        BaseOperation* addOperation = new AddOperation{registerName, value};
-        env.initRegister(registerName);
-        allOperations.push(addOperation);
+        currentOperation  = new AddOperation{registerName, value};
+        env.storeOperation(registerName, currentOperation);
+
+        return currentOperation; 
+        
+        //allOperations.push_back(addOperation);
     }
     else if (operationType == "subtract")
     {
         std::string registerName = operation[0];
         std::string value = operation[2];
-        BaseOperation* subtractOperation = new SubtractOperation{registerName, value};
-        env.initRegister(registerName);
-        allOperations.push(subtractOperation);
+        currentOperation = new SubtractOperation{registerName, value};
+        env.storeOperation(registerName, currentOperation);
+        return currentOperation;
+        //env.initRegister(registerName);
+        //allOperations.push_back(subtractOperation);
     }
     else if (operationType == "multiply")
     {
         std::string registerName = operation[0];
         std::string value = operation[2];
-        BaseOperation* multiplyOperation = new MultiplyOperation{registerName, value};
-        env.initRegister(registerName);
-        allOperations.push(multiplyOperation);
+        currentOperation = new MultiplyOperation{registerName, value};
+        env.storeOperation(registerName, currentOperation);
+        return currentOperation;
+        //env.initRegister(registerName);
+        //allOperations.push_back(multiplyOperation);
     }
     else if (operationType == "quit")
     {
-        allOperations.push(new QuitOperation{});
+        return new QuitOperation{};
     }
     else
     {
         std::cerr << "Error, cannot classify operation: ";
         std::copy(operation.begin(), operation.end(), std::ostream_iterator<std::string>(std::cerr, " "));
         std::cerr << std::endl;
-        return;
+        return nullptr;
     }
 }
 
 void CalcParser::execute()
 {   
-    while (!allOperations.empty())
-    {
-        BaseOperation* operation = allOperations.front();
-
-        if (dynamic_cast<PrintOperation*>(operation))
-        {
-            while (!operationsExecAtPrint.empty())
-            {
-                BaseOperation* innerOperation = operationsExecAtPrint.front();
-                innerOperation -> setExecAtPrint(false);
-                innerOperation -> execute(env);
-
-                delete innerOperation;
-                operationsExecAtPrint.pop();
-            }
-        }
-
-        operation -> execute(env);
-           
-        if (operation -> getExecAtPrint())
-        {
-            operationsExecAtPrint.push(operation);
-        }
-        else
-        {
-            delete operation;
-        }
-
-        allOperations.pop();
-    }
+    
 }

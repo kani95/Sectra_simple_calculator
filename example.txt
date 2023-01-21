@@ -7,4 +7,3 @@ salaries multiply 5
 costs add 10 
 print result 
 QUIT
-
