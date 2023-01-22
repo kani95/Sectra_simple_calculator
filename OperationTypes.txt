@@ -1,8 +1,0 @@
-
-revenue add 200     : 200
-salaries add 20     : 20
-salaries multiply 5 : 100
-costs add 10        : 10
-costs add salaries  : 110
-result add revenue  : 200
-result subtract costs : 90

@@ -2,8 +2,7 @@
 #define ENVIRONMENT_H
 
 #include <unordered_map>
-#include <string>
-#include <vector>
+#include <queue>
 
 #include "Operations.h"
 
@@ -11,13 +10,15 @@ class Environment
 {
     public:
         ~Environment();
+    
         void storeOperation(std::string const& registerName, BaseOperation* newOperation);
-        long getRegisterValue(std::string const& registerName);
-        long execute(std::string const& registerName);
-        bool isRegister(std::string const& registerName);
+        long getRegisterValue(std::string const& registerName) const;
+        long evaluation(std::string const& registerName, long value = 0);
+        bool isRegister(std::string const& registerName) const;
+        bool registerNameIsAlpha(std::string const& registerName) const;
         
     private:        
-        std::unordered_map<std::string, std::vector<BaseOperation*>> registers;
+        std::unordered_map<std::string, std::queue<BaseOperation*>> registers;
         std::unordered_map<std::string, long> values;
 };
 

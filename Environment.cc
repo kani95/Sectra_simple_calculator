@@ -2,51 +2,92 @@
 
 #include "Environment.h"
 
+// ****** Destructor ******
 Environment::~Environment()
 {
-    for (auto& registerPair : registers)
+    for (auto& [registerName, operationsToExecute] : registers)
     {
-        for (BaseOperation* operation : registerPair.second)
+        while (!operationsToExecute.empty())
         {
-            delete operation;
+            delete operationsToExecute.front();
+            operationsToExecute.pop();
         }
     }
 }
 
+// Store a new operation in the environment for a given register
 void Environment::storeOperation(std::string const& registerName, BaseOperation* newOperation)
 {
-    registers[registerName].push_back(newOperation);
+    registers[registerName].push(newOperation);
 
-    values[registerName] = 0;
+    if (values.find(registerName) == values.end())
+    {
+        values[registerName] = 0;
+    }
 }
 
-long Environment::getRegisterValue(std::string const& registerName)
+// Get the value of a register as a long
+long Environment::getRegisterValue(std::string const& registerName) const
 {
     return values.at(registerName);
 }
 
-bool Environment::isRegister(std::string const& registerName)
+// Check if a register exists in the environment
+bool Environment::isRegister(std::string const& registerName) const
 {
     return registers.find(registerName) != registers.end();
 }
 
-long Environment::execute(std::string const& registerName)
+bool Environment::registerNameIsAlpha(std::string const& registerName) const
 {
-    long value{};
-
-    for (BaseOperation* operation : registers.at(registerName))
+    for (char c : registerName)
     {
-        if (isRegister(operation -> getValue()))
+        if (!std::isalpha(c))
         {
-            value = operation -> execute(value, execute(operation -> getValue()));
-        }
-        else
-        {
-            value = operation -> execute(value, std::stol(operation -> getValue()));
+            return false;
         }
     }
 
-    values[registerName] = value;
+    return true;
+}
+
+// Evaluate the value of a register by evaluating all the operations stored in the environment
+long Environment::evaluation(std::string const& registerName, long value)
+{
+    if (registers.at(registerName).empty())
+    {
+        value = values.at(registerName);
+    }
+    else
+    {
+        while (!registers.at(registerName).empty())
+        {
+            BaseOperation* operation{registers.at(registerName).front()};
+        
+            // if the value is a register, then evaluate its operations to retrieve its value
+            if (isRegister(operation -> getValue()))
+            {
+                value = operation -> evaluation(value, evaluation(operation -> getValue()));
+            }
+            // else, the value is a number, so we can convert it to a long
+            else
+            {
+                try {
+                    value = operation -> evaluation(value, std::stol(operation -> getValue()));
+                }
+                catch (std::invalid_argument const& e)
+                {
+                    std::cerr << "Cannot evaluate operation with register: " << registerName 
+                              << " and value: " <<  operation -> getValue() << std::endl;
+                }
+            }
+
+            delete operation;
+            registers.at(registerName).pop();
+        }
+
+        values[registerName] = value;
+    }
 
     return value;
 }

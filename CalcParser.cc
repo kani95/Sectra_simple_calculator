@@ -6,6 +6,7 @@
 #include "CalcParser.h"
 #include "Operations.h"
 
+// Parse the input file line for line to create the operations and store them in the environment object
 void CalcParser::parse(std::ifstream & inputFile)
 {
     using namespace std::string_literals;
@@ -14,38 +15,55 @@ void CalcParser::parse(std::ifstream & inputFile)
     std::stringstream ss{};
     std::vector<std::string> extractedLine{};
 
+    // For each line in the input file
     while(std::getline(inputFile, line))
     {
         ss << line;
         std::string word{};
        
+        // Extract the words from the line
         while (ss >> word)
         {
+            // Convert the word to lowercase
             std::transform(word.begin(), word.end(), word.begin(), ::tolower);
             extractedLine.push_back(word);
         }
 
-        std::string operationsType {getOperationType(extractedLine)};
+        std::string const operationsType {getOperationType(extractedLine)};
+        std::string registerName{};
 
+        // The line is filled with spaces or has more than 3 words
         if (operationsType.size() == 0)
         {
             continue;
         }
-
-        if (operationsType == "print"s)
+        
+        if (operationsType == "print")
         {
-            std::string registerName = extractedLine[1];
-            env.execute(registerName);
-            std::cout << env.getRegisterValue(registerName) << std::endl;
+            registerName = extractedLine[1];
+            
+            // Check if the register exists
+            if (!env.isRegister(registerName))
+            {
+                std::cerr << "Register " << registerName << " does not exist" << std::endl;
+                continue;
+            }
+
+            // Print the value of the register by starting the evaluation
+            long currentValue = env.getRegisterValue(registerName);
+            std::cout << env.evaluation(registerName, currentValue) << std::endl;
+            
         }
         else if (operationsType == "quit"s)
         {
-            exit(1);
+            // Exit parsing and return to main.cpp
+            return;
         }
         else
         {
-            std::string registerName = extractedLine[0];
-            std::string value = extractedLine[2];
+            // Create an operation node and add it to the environment
+            registerName = extractedLine[0];
+            std::string const value = extractedLine[2];
             createOperationNode(registerName, operationsType, value); 
         }
         
@@ -54,10 +72,11 @@ void CalcParser::parse(std::ifstream & inputFile)
     }
 }
 
+// Get the type of operation from the line, which depends on the number of arguments the operation has
 std::string CalcParser::getOperationType(std::vector<std::string> const& operation)
 {
-    size_t nrOfArgs = operation.size();
-    std::string operationType;
+    size_t const nrOfArgs = operation.size();
+    std::string operationType{};
 
     if (nrOfArgs == 0)
     {
@@ -73,7 +92,7 @@ std::string CalcParser::getOperationType(std::vector<std::string> const& operati
     }
     else
     {
-        std::cerr << "Error, cannot classify operation: ";
+        std::cerr << "Error, cannot get operation type from operation: ";
         std::copy(operation.begin(), operation.end(), std::ostream_iterator<std::string>(std::cerr, " "));
         std::cerr << std::endl;
         return "";
@@ -82,11 +101,14 @@ std::string CalcParser::getOperationType(std::vector<std::string> const& operati
     return operationType;
 }
 
-void CalcParser::createOperationNode(std::string const& registerName, std::string const& operationType, std::string const& value)
+// Create the operation node and store it in the environment
+void CalcParser::createOperationNode(std::string const& registerName, 
+                                     std::string const& operationType,
+                                     std::string const& value)
 {
     using namespace std::string_literals;
 
-    BaseOperation* currentOperation;
+    BaseOperation* currentOperation{nullptr};
 
     if (operationType == "add"s)
     {
@@ -102,13 +124,12 @@ void CalcParser::createOperationNode(std::string const& registerName, std::strin
     }
     else
     {
-        std::cerr << "Error, cannot classify operation: " << registerName << " " << operationType << " " << value << std::endl;
+        std::cerr << "Error, cannot create operation: " << registerName 
+                  << " " << operationType << " " << value << std::endl;
     }
 
-    env.storeOperation(registerName, currentOperation); 
-}
-
-void CalcParser::execute()
-{   
-    
+    if (currentOperation != nullptr)
+    {
+        env.storeOperation(registerName, currentOperation);
+    }
 }

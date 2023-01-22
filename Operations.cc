@@ -1,44 +1,43 @@
-#include <iostream>
-
 #include "Operations.h"
+
+// ****** Constructors ******
 
 BaseOperation::BaseOperation(std::string const& registerName, std::string const& value)
     : registerName{registerName}, value{value}
 {}
 
-std::string BaseOperation::getRegisterName() const
-{
-    return registerName;
-}
-
-std::string BaseOperation::getValue() const
-{
-    return value;
-}
-
 AddOperation::AddOperation(std::string const& registerName, std::string const& value)
     : BaseOperation{registerName, value}
 {}
-
-long AddOperation::execute(long oldValue, long newValue)
-{
-    return oldValue + newValue;
-}
 
 SubtractOperation::SubtractOperation(std::string const& registerName, std::string const& value)
     : BaseOperation{registerName, value}
 {}
 
-long SubtractOperation::execute(long oldValue, long newValue)
-{
-    return oldValue - newValue;
-}
-
 MultiplyOperation::MultiplyOperation(std::string const& registerName, std::string const& value)
     : BaseOperation{registerName, value}
 {}
 
-long MultiplyOperation::execute(long oldValue, long newValue)
+// ******* Getters ********
+
+std::string const& BaseOperation::getValue() const
+{
+    return value;
+}
+
+// ****** Evaluation ******
+
+long AddOperation::evaluation(long const oldValue, long const newValue)
+{
+    return oldValue + newValue;
+}
+
+long SubtractOperation::evaluation(long const oldValue, long const newValue)
+{
+    return oldValue - newValue;
+}
+
+long MultiplyOperation::evaluation(long const oldValue, long const newValue)
 {
     return oldValue * newValue;
 }

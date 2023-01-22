@@ -2,20 +2,35 @@
 #define OPERATIONS_H
 
 #include <string>
-#include <unordered_map>
-#include <vector>
+
+// To create a new operation, add a new class that inherits from BaseOperation
+/*
+    for instance a new operation called "divide" can be created by adding the following class:
+
+    class DivideOperation : public BaseOperation
+    {
+        public:
+            DivideOperation(std::string const& registerName, std::string const& value);
+            long evaluation(long const oldValue, long const newValue) override;
+    };
+
+    And then add a match in CalcParser.cc in method createOperationNode:
+
+    else if (operationType == "divide"s)
+    {
+        currentOperation = new DivideOperation{registerName, value};
+    }
+*/
 
 class BaseOperation
 {
     public:
         BaseOperation(std::string const& registerName, std::string const& value);
-
         virtual ~BaseOperation() = default;
-        virtual long execute(long oldValue, long newValue) = 0;
-        
-        std::string getRegisterName() const;
-        std::string getValue() const;
 
+        virtual long evaluation(long const oldValue, long const newValue) = 0;
+        std::string const& getValue() const;
+    
     protected:
         std::string registerName;
         std::string value;
@@ -24,31 +39,22 @@ class BaseOperation
 class AddOperation : public BaseOperation
 {
     public:
-        using BaseOperation::getRegisterName;
-        using BaseOperation::getValue;
-
         AddOperation(std::string const& registerName, std::string const& value);
-        long execute(long oldValue, long newValue) override;
+        long evaluation(long const oldValue, long const newValue) override;
 };
 
 class SubtractOperation : public BaseOperation
 {
     public:
-        using BaseOperation::getRegisterName;
-        using BaseOperation::getValue;
-
         SubtractOperation(std::string const& registerName, std::string const& value);
-        long execute(long oldValue, long newValue) override;
+        long evaluation(long const oldValue, long const newValue) override;
 };
 
 class MultiplyOperation : public BaseOperation
 {
     public:
-        using BaseOperation::getRegisterName;
-        using BaseOperation::getValue;
-
         MultiplyOperation(std::string const& registerName, std::string const& value);
-        long execute(long oldValue, long newValue) override;
+        long evaluation(long const oldValue, long const newValue) override;
 };
 
 #endif
