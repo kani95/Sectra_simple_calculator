@@ -7,6 +7,7 @@
  * Circular operations should not be allowed, such as: 
     - reg1 add reg2
     - reg2 add reg1 
+    
     or 
     - reg1 add reg1 
 
