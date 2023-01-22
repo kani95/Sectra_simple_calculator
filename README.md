@@ -16,6 +16,7 @@ Given that the user has **GNU compiler** installed.
 The calculator is executed by running the following command:
 
 >**make**
+
 >**./calculator *example.txt***
 
 Otherwise, to use the compiler of their choice the user can update the makefile variables:
