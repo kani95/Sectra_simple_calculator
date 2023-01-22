@@ -1,5 +1,5 @@
 CPPFLAGS	=	-std=c++20 -Wall -Wextra -Wpedantic -Werror -g
-CC			=	g++
+CC		=	g++
 OBJECTS		=	main.o CalcParser.o Environment.o Operations.o
 PROGRAM		=	calculator
 
