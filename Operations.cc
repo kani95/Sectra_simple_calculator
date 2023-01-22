@@ -25,19 +25,24 @@ std::string const& BaseOperation::getValue() const
     return value;
 }
 
+std::string const& BaseOperation::getRegisterName() const
+{
+    return registerName;
+}
+
 // ****** Evaluation ******
 
-long AddOperation::evaluation(long const oldValue, long const newValue)
+long AddOperation::evaluation(long const oldValue, long const newValue) const
 {
     return oldValue + newValue;
 }
 
-long SubtractOperation::evaluation(long const oldValue, long const newValue)
+long SubtractOperation::evaluation(long const oldValue, long const newValue) const
 {
     return oldValue - newValue;
 }
 
-long MultiplyOperation::evaluation(long const oldValue, long const newValue)
+long MultiplyOperation::evaluation(long const oldValue, long const newValue) const
 {
     return oldValue * newValue;
 }

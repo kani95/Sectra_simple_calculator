@@ -45,14 +45,14 @@ void CalcParser::parse(std::ifstream & inputFile)
             // Check if the register exists
             if (!env.isRegister(registerName))
             {
-                std::cerr << "Register " << registerName << " does not exist" << std::endl;
-                continue;
+                std::cerr << "Cannot print register \"" << registerName << "\", it does not exist." << std::endl;
             }
-
-            // Print the value of the register by starting the evaluation
-            long currentValue = env.getRegisterValue(registerName);
-            std::cout << env.evaluation(registerName, currentValue) << std::endl;
-            
+            else
+            {
+                // Print the value of the register by starting the evaluation
+                long currentValue = env.getRegisterValue(registerName);
+                std::cout << env.evaluation(registerName, currentValue) << std::endl;
+            }
         }
         else if (operationsType == "quit"s)
         {
@@ -73,7 +73,7 @@ void CalcParser::parse(std::ifstream & inputFile)
 }
 
 // Get the type of operation from the line, which depends on the number of arguments the operation has
-std::string CalcParser::getOperationType(std::vector<std::string> const& operation)
+std::string CalcParser::getOperationType(std::vector<std::string> const& operation) const
 {
     size_t const nrOfArgs = operation.size();
     std::string operationType{};
@@ -107,6 +107,15 @@ void CalcParser::createOperationNode(std::string const& registerName,
                                      std::string const& value)
 {
     using namespace std::string_literals;
+    
+    bool const isCircularDependent{checkDependency(registerName, value)};
+
+    if (!isCircularDependent)
+    {
+        std::cerr << "Error, circular dependency detected: " << registerName 
+                  << " " << operationType << " " << value << std::endl;
+        return;
+    }
 
     BaseOperation* currentOperation{nullptr};
 
@@ -132,4 +141,24 @@ void CalcParser::createOperationNode(std::string const& registerName,
     {
         env.storeOperation(registerName, currentOperation);
     }
+}
+
+// Check if the register is dependent on itself or on another register that is dependent on it
+bool CalcParser::checkDependency(std::string const& registerName, std::string const& value) const
+{
+    bool result{true};
+
+    if (registerName == value)
+    {
+        result = false;
+    }
+    else if (env.isRegister(value))
+    {
+        if (env.isCircularDependent(registerName, value))
+        {
+            result = false;
+        }
+    }
+
+    return result;
 }

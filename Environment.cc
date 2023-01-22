@@ -38,19 +38,6 @@ bool Environment::isRegister(std::string const& registerName) const
     return registers.find(registerName) != registers.end();
 }
 
-bool Environment::registerNameIsAlpha(std::string const& registerName) const
-{
-    for (char c : registerName)
-    {
-        if (!std::isalpha(c))
-        {
-            return false;
-        }
-    }
-
-    return true;
-}
-
 // Evaluate the value of a register by evaluating all the operations stored in the environment
 long Environment::evaluation(std::string const& registerName, long value)
 {
@@ -72,7 +59,9 @@ long Environment::evaluation(std::string const& registerName, long value)
             // else, the value is a number, so we can convert it to a long
             else
             {
-                try {
+                // If the value is not a number, then we cannot evaluate the operation
+                try 
+                {
                     value = operation -> evaluation(value, std::stol(operation -> getValue()));
                 }
                 catch (std::invalid_argument const& e)
@@ -90,4 +79,28 @@ long Environment::evaluation(std::string const& registerName, long value)
     }
 
     return value;
+}
+
+// Check if a register is dependent on another register
+bool Environment::isCircularDependent(std::string const& registerName, std::string const& value) const
+{
+    if (registers.at(value).empty())
+    {
+        return false;
+    }
+    else
+    {
+        std::queue<BaseOperation*> operationsToExecute{registers.at(value)};
+        while (!operationsToExecute.empty())
+        {
+            BaseOperation* operation{operationsToExecute.front()};
+            if (operation -> getValue() == registerName && operation -> getRegisterName() == value)
+            {
+                return true;
+            }
+            operationsToExecute.pop();
+        }
+    }
+
+    return false;  
 }

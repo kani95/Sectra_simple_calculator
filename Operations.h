@@ -28,8 +28,9 @@ class BaseOperation
         BaseOperation(std::string const& registerName, std::string const& value);
         virtual ~BaseOperation() = default;
 
-        virtual long evaluation(long const oldValue, long const newValue) = 0;
+        virtual long evaluation(long const oldValue, long const newValue) const = 0 ;
         std::string const& getValue() const;
+        std::string const& getRegisterName() const;
     
     protected:
         std::string registerName;
@@ -40,21 +41,21 @@ class AddOperation : public BaseOperation
 {
     public:
         AddOperation(std::string const& registerName, std::string const& value);
-        long evaluation(long const oldValue, long const newValue) override;
+        long evaluation(long const oldValue, long const newValue) const override;
 };
 
 class SubtractOperation : public BaseOperation
 {
     public:
         SubtractOperation(std::string const& registerName, std::string const& value);
-        long evaluation(long const oldValue, long const newValue) override;
+        long evaluation(long const oldValue, long const newValue) const override;
 };
 
 class MultiplyOperation : public BaseOperation
 {
     public:
         MultiplyOperation(std::string const& registerName, std::string const& value);
-        long evaluation(long const oldValue, long const newValue) override;
+        long evaluation(long const oldValue, long const newValue) const override;
 };
 
 #endif

@@ -15,7 +15,7 @@ class Environment
         long getRegisterValue(std::string const& registerName) const;
         long evaluation(std::string const& registerName, long value = 0);
         bool isRegister(std::string const& registerName) const;
-        bool registerNameIsAlpha(std::string const& registerName) const;
+        bool isCircularDependent(std::string const& registerName, std::string const& value) const;
         
     private:        
         std::unordered_map<std::string, std::queue<BaseOperation*>> registers;
